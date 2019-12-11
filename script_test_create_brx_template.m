@@ -1,10 +1,11 @@
 % A test script to obtain the template and excess attenuation from the brx data
-band = 'Ka'; % <-- CHANGE BAND HERE
-day_process = datetime(2019, 5, 28); % <-- CHANGE DAY HERE
-events_file_path = 'lln_EF_201905.txt';
+band = 'Q'; % <-- CHANGE BAND HERE
+day_process = datetime(2019, 8, 9); % <-- CHANGE DAY HERE
+events_file_path = 'lln_EF_20190809.txt';
+brx_data_dir_path = 'C:\Users\Arthur\Documents\University\MA1_Q1\LELEC2910\Propagation_project\Antennas_2\L1_co\Wind\2019-08-10';
                 
 %% Test default suggested behavior (with filter)
-[dtime, brx_level, brx_template, events] = processing.create_brx_template(day_process, band, events_file_path, []);                
+[dtime, brx_level, brx_template, events] = processing.create_brx_template(day_process, band, events_file_path, brx_data_dir_path,0,0);                
 excess_attenuation = brx_template - brx_level;
 
 figure;

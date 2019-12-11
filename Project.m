@@ -1,5 +1,6 @@
 clear all;
 close all;
+plotEnable = false;
 
 %% Rain gauge
 
@@ -13,7 +14,6 @@ rainMay = load('RainGauge/UCL_rain_rate_20190501-20190531.mat');
 rainMay = rainMay.rr;
 
 %% WIND - Q band - 10 août 2019
-plotEnable = true;
 
 day3 = load('L1_co/Wind/2019-08-10/Alphasat_Q_LLN_L1_co_20190811.mat');
 day2 = load('L1_co/Wind/2019-08-10/Alphasat_Q_LLN_L1_co_20190810.mat');
@@ -36,6 +36,15 @@ rainWavre = rainAugust.wavre(ind_period);
 lvlday1 = day1.level;
 lvlday2 = day2.level;
 lvlday3 = day3.level;
+
+%% BRX template
+
+band = 'Q';
+day_process = datetime(2019, 8, 9);
+events_file_path = 'lln_EF_20190809.txt';
+
+[dtime, brx_level, brx_template, events] = processing.create_brx_template(day_process, band, events_file_path, 'C:/Users/Arthur/Documents/University/MA1_Q1/LELEC2910/Propagation_project/Antennas_2/L1_co/Wind/2019-08-10/Alphasat_Q_LLN_L1_co_20190809.mat');                
+excess_attenuation = brx_template - brx_level;
 
 %% Plots
 
