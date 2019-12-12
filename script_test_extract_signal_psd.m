@@ -4,7 +4,7 @@ segment_length_in_minutes = 10; % [min]
 sampling_rate = 10; % [Hz]
 
 %% Test day with low clear-sky scintillation and rain
-brx = load(['Alphasat_' band '_LLN_L1_co_20190528.mat']);
+brx = load(['C:\Users\Arthur\Documents\University\MA1_Q1\LELEC2910\Propagation_project\Antennas_2\L1_co\Scintillation\2019-05-27\' ['Alphasat_' band '_LLN_L1_co_20190528.mat']]);
 
 % Clear-sky
 t_0 = datetime(2019, 5, 28, 0, 0, 0);
@@ -51,7 +51,7 @@ ylabel('Power Spectral Density [dB^2/Hz]')
 title(sprintf('Alphasat %s LLN %s to %s', band, datestr(t_0, 'yyyy-mm-dd HH:MM:SS'), datestr(t_end, 'yyyy-mm-dd HH:MM:SS')));
 
 %% Test day with wind induced antenna vibrations
-brx = load(['Alphasat_' band '_LLN_L1_co_20190608.mat']);
+brx = load(['C:\Users\Arthur\Documents\University\MA1_Q1\LELEC2910\Propagation_project\Antennas_2\L1_co\Wind\2019-06-08\' ['Alphasat_' band '_LLN_L1_co_20190608.mat']]);
 
 
 t_0 = datetime(2019, 6, 8, 2, 0, 0);

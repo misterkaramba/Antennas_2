@@ -1,6 +1,6 @@
 clear all;
 close all;
-plotEnable = false;
+plotEnable = true;
 
 %% Rain gauge
 
@@ -39,11 +39,12 @@ lvlday3 = day3.level;
 
 %% BRX template
 
-band = 'Q';
-day_process = datetime(2019, 8, 9);
+band = 'Q'; % <-- CHANGE BAND HERE
+day_process = datetime(2019, 8, 10); % <-- CHANGE DAY HERE
 events_file_path = 'lln_EF_20190809.txt';
-
-[dtime, brx_level, brx_template, events] = processing.create_brx_template(day_process, band, events_file_path, 'C:/Users/Arthur/Documents/University/MA1_Q1/LELEC2910/Propagation_project/Antennas_2/L1_co/Wind/2019-08-10/Alphasat_Q_LLN_L1_co_20190809.mat');                
+brx_data_dir_path = 'C:\Users\Arthur\Documents\University\MA1_Q1\LELEC2910\Propagation_project\Antennas_2\L1_co\Wind\2019-08-10';
+  
+[dtime, brx_level, brx_template, events] = processing.create_brx_template(day_process, band, events_file_path, brx_data_dir_path,1,1,true);                
 excess_attenuation = brx_template - brx_level;
 
 %% Plots
