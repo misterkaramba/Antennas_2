@@ -15,9 +15,9 @@ rainMay = rainMay.rr;
 
 %% WIND - Q band - 10 août 2019
 
-day3 = load('L1_co/Wind/2019-08-10/Alphasat_Ka_LLN_L1_co_20190811.mat');
-day2 = load('L1_co/Wind/2019-08-10/Alphasat_Ka_LLN_L1_co_20190810.mat');
-day1 = load('L1_co/Wind/2019-08-10/Alphasat_Ka_LLN_L1_co_20190809.mat');
+day3 = load('L1_co/Wind/2019-08-10/Alphasat_Q_LLN_L1_co_20190811.mat');
+day2 = load('L1_co/Wind/2019-08-10/Alphasat_Q_LLN_L1_co_20190810.mat');
+day1 = load('L1_co/Wind/2019-08-10/Alphasat_Q_LLN_L1_co_20190809.mat');
 
 time = day1.dtime;
 time = time-time(1);
@@ -55,16 +55,16 @@ sampling_rate = 10; % [Hz]
 t_0 = datetime(2019, 8, 9, 0, 0, 0);
 t_end = datetime(2019, 8, 11, 23, 0, 0);
 ind_block = (t_0 <= dtime) & (dtime <= t_end);
-signal_block = bandstop(excess_attenuation(ind_block),[2 3]);
+signal_block = excess_attenuation(ind_block);
 [PSD, f_PSD] = processing.extract_signal_psd(signal_block, segment_length_in_minutes, sampling_rate);
 
-figure;
-plot(dtime(ind_block), signal_block);
-grid minor;
-xlabel('Time')
-ylabel('Signal level ["dB"]');
-xtickformat('dd-HH:mm')
-title(sprintf('Alphasat %s LLN %s to %s', band, datestr(t_0, 'yyyy-mm-dd HH:MM:SS'), datestr(t_end, 'yyyy-mm-dd HH:MM:SS')));
+% figure;
+% plot(dtime(ind_block), signal_block);
+% grid minor;
+% xlabel('Time')
+% ylabel('Signal level ["dB"]');
+% xtickformat('dd-HH:mm')
+% title(sprintf('Alphasat %s LLN %s to %s', band, datestr(t_0, 'yyyy-mm-dd HH:MM:SS'), datestr(t_end, 'yyyy-mm-dd HH:MM:SS')));
 
 figure;
 loglog(f_PSD, PSD);
@@ -73,36 +73,89 @@ xlabel('Frequency [Hz]')
 ylabel('Power Spectral Density [dB^2/Hz]')
 title(sprintf('Alphasat %s LLN %s to %s', band, datestr(t_0, 'yyyy-mm-dd HH:MM:SS'), datestr(t_end, 'yyyy-mm-dd HH:MM:SS')));
 
+%% ERA5 - correlation between speed and spectral density
+ERA = load('ERA5\ERA5_Surface_LLN_20190801-20190831.mat');
+speed_north = ERA.v10;
+speed_east = ERA.u10;
+time_measured = ERA.dtime; %measurements are made every one hour;
+
+PSD_table_9 = zeros(71,1); 
+
+for i=0:70
+    t_0 = datetime(2019, 8, 9, i, 0, 0);
+    t_end = datetime(2019, 8, 9, i+1, 0, 0);
+    ind_block = (t_0 <= dtime) & (dtime <= t_end);
+    signal_block = excess_attenuation(ind_block);
+    [PSD, f_PSD] = processing.extract_signal_psd(signal_block, segment_length_in_minutes, sampling_rate);
+    
+%     figure;
+%     loglog(f_PSD, PSD);
+%     grid minor;
+%     xlabel('Frequency [Hz]')
+%     ylabel('Power Spectral Density [dB^2/Hz]')
+%     title(sprintf('Alphasat %s LLN %s to %s', band, datestr(t_0, 'yyyy-mm-dd HH:MM:SS'), datestr(t_end, 'yyyy-mm-dd HH:MM:SS')));
+    
+    index = 2385:2475; % location of the peak -> 2.9 ~3.02 Hz
+    PSD_table_9(i+1) = sum(PSD(index))/length(index); %2.9956Hz
+    
+end
+
+ind_period_measurement = find((datetime(2019, 8, 9, 0, 0, 0)<= time_measured) &  (datetime(2019, 8, 11, 23, 0, 0) > time_measured));
+wind_speed_north = speed_north(ind_period_measurement);
+wind_speed_east = speed_east(ind_period_measurement);
+
+R = corrcoef([PSD_table_9 abs(wind_speed_north) abs(wind_speed_east)]) 
+
 %% Plots
 
 if(plotEnable)
-    figure();
-    plot(time,lvlday1);
-    title('day1');
+%     figure();
+%     plot(time,lvlday1);
+%     title('day1');
+% 
+%     figure();
+%     plot(time,lvlday2);
+%     title('day2');
+% 
+%     figure();
+%     plot(time,lvlday3);
+%     title('day3');
+%     
+%     figure();
+%     plot(t_hours,rainLLN);
+%     title('rain lln');
+%     
+%     figure();
+%     plot(t_hours,rainPerwez);
+%     title('rain perwez');
+%     
+%     figure();
+%     plot(t_hours,rainBousval);
+%     title('rain bousval');
+%     
+%     figure();
+%     plot(t_hours,rainWavre);
+%     title('rain wavre');
+    
+    figure;
+    subplot(2, 1, 1)
+    plot(dtime, brx_level); hold on;
+    plot(dtime, brx_template);
+    xtickformat('dd-HH')
+    xlabel('Time [hours]');
+    ylabel('Signal level ["dB"]');
+    grid minor;
+    legend('Signal', 'Template', 'location', 'best')
+    title(sprintf('Alphasat %s band - LLN - %s', band, datestr(day_process, 'yyyy-mm-dd')));
+    subplot(2, 1, 2)
+    plot(dtime, excess_attenuation); hold on;
+    plot(dtime, events*max(excess_attenuation)/2);
+    xtickformat('dd-HH')
+    xlabel('Time [hours]');
+    ylabel('Attenuation [dB]');
+    grid minor;
+    legend('Excess', 'Events', 'location', 'best')
 
-    figure();
-    plot(time,lvlday2);
-    title('day2');
-
-    figure();
-    plot(time,lvlday3);
-    title('day3');
-    
-    figure();
-    plot(t_hours,rainLLN);
-    title('rain lln');
-    
-    figure();
-    plot(t_hours,rainPerwez);
-    title('rain perwez');
-    
-    figure();
-    plot(t_hours,rainBousval);
-    title('rain bousval');
-    
-    figure();
-    plot(t_hours,rainWavre);
-    title('rain wavre');
     
 end
 
