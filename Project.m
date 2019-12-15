@@ -95,8 +95,10 @@ for i=0:70
 %     ylabel('Power Spectral Density [dB^2/Hz]')
 %     title(sprintf('Alphasat %s LLN %s to %s', band, datestr(t_0, 'yyyy-mm-dd HH:MM:SS'), datestr(t_end, 'yyyy-mm-dd HH:MM:SS')));
     
+    mean = sum(PSD)/length(PSD);
+    
     index = 2385:2475; % location of the peak -> 2.9 ~3.02 Hz
-    PSD_table_9(i+1) = sum(PSD(index))/length(index); %2.9956Hz
+    PSD_table_9(i+1) = sum(PSD(index))/(length(index)*mean); %2.9956Hz
     
 end
 
