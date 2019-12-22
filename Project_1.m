@@ -1,6 +1,6 @@
 clear all;
 close all;
-plotEnable = false;
+plotEnable = true;
 
 %% Rain gauge
 
@@ -15,22 +15,22 @@ rainMay = rainMay.rr;
 
 %% WIND - Q band - 10 août 2019
 
-day3 = load('L1_co/Wind/2019-08-10/Alphasat_Q_LLN_L1_co_20190811.mat');
-day2 = load('L1_co/Wind/2019-08-10/Alphasat_Q_LLN_L1_co_20190810.mat');
-day1 = load('L1_co/Wind/2019-08-10/Alphasat_Q_LLN_L1_co_20190809.mat');
+day3 = load('L1_co/Wind/2019-06-13/Alphasat_Q_LLN_L1_co_20190614.mat');
+day2 = load('L1_co/Wind/2019-06-13/Alphasat_Q_LLN_L1_co_20190613.mat');
+day1 = load('L1_co/Wind/2019-06-13/Alphasat_Q_LLN_L1_co_20190612.mat');
 
 time = day1.dtime;
 time = time-time(1);
 time = hours(time);
 
-ind_period = find((datetime(day1.dtime.Year(1), day1.dtime.Month(1), day1.dtime.Day(1))<= rainAugust.time) &  (datetime(day3.dtime.Year(1), day3.dtime.Month(1), day3.dtime.Day(1)+1)) > rainAugust.time);
-t_period = rainAugust.time(ind_period);
+ind_period = find((datetime(day1.dtime.Year(1), day1.dtime.Month(1), day1.dtime.Day(1))<= rainJune.time) &  (datetime(day3.dtime.Year(1), day3.dtime.Month(1), day3.dtime.Day(1)+1)) > rainJune.time);
+t_period = rainJune.time(ind_period);
 t_hours = hours(t_period - t_period(1));
 
-rainLLN = rainAugust.lln(ind_period);
-rainPerwez = rainAugust.perwez(ind_period);
-rainBousval = rainAugust.bousval(ind_period);
-rainWavre = rainAugust.wavre(ind_period);
+rainLLN = rainJune.lln(ind_period);
+rainPerwez = rainJune.perwez(ind_period);
+rainBousval = rainJune.bousval(ind_period);
+rainWavre = rainJune.wavre(ind_period);
 
 
 lvlday1 = day1.level;
@@ -40,9 +40,9 @@ lvlday3 = day3.level;
 %% BRX template
 
 band = 'Q'; % <-- CHANGE BAND HERE
-day_process = datetime(2019, 8, 10); % <-- CHANGE DAY HERE
-events_file_path = 'lln_EF_20190809.txt';
-brx_data_dir_path = 'C:\Users\Arthur\Documents\University\MA1_Q1\LELEC2910\Propagation_project\Antennas_2\L1_co\Wind\2019-08-10';
+day_process = datetime(2019, 6, 13); % <-- CHANGE DAY HERE
+events_file_path = 'lln_EF_20190612.txt';
+brx_data_dir_path = 'C:\Users\Arthur\Documents\University\MA1_Q1\LELEC2910\Propagation_project\Antennas_2\L1_co\Wind\2019-06-13';
   
 [dtime, brx_level, brx_template, events] = processing.create_brx_template(day_process, band, events_file_path, brx_data_dir_path,1,1,true);                
 excess_attenuation = brx_template - brx_level;
@@ -52,8 +52,8 @@ segment_length_in_minutes = 10; % [min]
 sampling_rate = 10; % [Hz]
 
 
-t_0 = datetime(2019, 8, 9, 0, 0, 0);
-t_end = datetime(2019, 8, 11, 23, 0, 0);
+t_0 = datetime(2019, 6, 12, 0, 0, 0);
+t_end = datetime(2019, 6, 14, 23, 0, 0);
 ind_block = (t_0 <= dtime) & (dtime <= t_end);
 signal_block = excess_attenuation(ind_block);
 [PSD, f_PSD] = processing.extract_signal_psd(signal_block, segment_length_in_minutes, sampling_rate);
@@ -74,7 +74,7 @@ ylabel('Power Spectral Density [dB^2/Hz]')
 title(sprintf('Alphasat %s LLN %s to %s', band, datestr(t_0, 'yyyy-mm-dd HH:MM:SS'), datestr(t_end, 'yyyy-mm-dd HH:MM:SS')));
 
 %% ERA5 - correlation between speed and spectral density
-ERA = load('ERA5\ERA5_Surface_LLN_20190801-20190831.mat');
+ERA = load('ERA5\ERA5_Surface_LLN_20190601-20190630.mat');
 speed_north = ERA.v10;
 speed_east = ERA.u10;
 time_measured = ERA.dtime; %measurements are made every one hour;
@@ -82,8 +82,8 @@ time_measured = ERA.dtime; %measurements are made every one hour;
 PSD_table_9 = zeros(71,1); 
 
 for i=0:70
-    t_0 = datetime(2019, 8, 9, i, 0, 0);
-    t_end = datetime(2019, 8, 9, i+1, 0, 0);
+    t_0 = datetime(2019, 6, 12, i, 0, 0);
+    t_end = datetime(2019, 6, 12, i+1, 0, 0);
     ind_block = (t_0 <= dtime) & (dtime <= t_end);
     signal_block = excess_attenuation(ind_block);
     [PSD, f_PSD] = processing.extract_signal_psd(signal_block, segment_length_in_minutes, sampling_rate);
@@ -95,77 +95,50 @@ for i=0:70
 %     ylabel('Power Spectral Density [dB^2/Hz]')
 %     title(sprintf('Alphasat %s LLN %s to %s', band, datestr(t_0, 'yyyy-mm-dd HH:MM:SS'), datestr(t_end, 'yyyy-mm-dd HH:MM:SS')));
     
-    index = 2385:2475; % location of the peak -> 2.9 ~3.02 Hz
+    index = 2336:2459; % location of the peak -> 2.9 ~3.02 Hz
     PSD_table_9(i+1) = sum(PSD(index))/(length(index)); %2.9956Hz
     
 end
 
-ind_period_measurement = find((datetime(2019, 8, 9, 0, 0, 0)<= time_measured) &  (datetime(2019, 8, 11, 23, 0, 0) > time_measured));
+ind_period_measurement = find((datetime(2019, 6, 12, 0, 0, 0)<= time_measured) &  (datetime(2019, 6, 14, 23, 0, 0) > time_measured));
 wind_speed_north = speed_north(ind_period_measurement);
 wind_speed_east = speed_east(ind_period_measurement);
 % test = time_measured(ind_period_measurement)
 R = corrcoef([PSD_table_9 abs(wind_speed_north) abs(wind_speed_east)]) 
 
-%% slope
-t_0 = datetime(2019, 8, 10, 17, 0, 0);
-t_end = datetime(2019, 8, 10, 18, 0, 0);
-ind_block = (t_0 <= dtime) & (dtime <= t_end);
-signal_block = excess_attenuation(ind_block);
-[PSD, f_PSD] = processing.extract_signal_psd(signal_block, segment_length_in_minutes, sampling_rate);
-
-figure;
-loglog(f_PSD, PSD);
-hold on;
-grid minor;
-xlabel('Frequency [Hz]')
-ylabel('Power Spectral Density [dB^2/Hz]')
-title(sprintf('Alphasat %s LLN %s to %s', band, datestr(t_0, 'yyyy-mm-dd HH:MM:SS'), datestr(t_end, 'yyyy-mm-dd HH:MM:SS')));
-    
-x = [f_PSD(1387:1892)',f_PSD(2936:4097)'];
-y = [PSD(1387:1892)',PSD(2936:4097)'];
-
-x = log10(x./x(1));
-y = 10*log10(y);
-
-p = polyfit(x,y,1);
-
-slope = (10*(PSD(1387))).*f_PSD(1387:4097).^(p(1)/10);
-loglog(f_PSD(1387:4097),slope);
-
-%y = 0.004935*x.^(-8/3)
 %% Plots
 
 if(plotEnable)
-    figure();
-    plot(time,lvlday1);
-    title('day1');
-
-    figure();
-    plot(time,lvlday2);
-    title('day2');
-
-    figure();
-    plot(time,lvlday3);
-    title('day3');
-    
+%     figure();
+%     plot(time,lvlday1);
+%     title('day1');
+% 
+%     figure();
+%     plot(time,lvlday2);
+%     title('day2');
+% 
+%     figure();
+%     plot(time,lvlday3);
+%     title('day3');
+%     
     figure();
     plot(t_period,rainLLN);
     xtickformat('dd-HH')
     xlabel('Time [hours]');
     ylabel('Rain gauge [mm]');
     title('Rain gauge Louvain-la-Neuve');
-    
-    figure();
-    plot(t_hours,rainPerwez);
-    title('rain perwez');
-    
-    figure();
-    plot(t_hours,rainBousval);
-    title('rain bousval');
-    
-    figure();
-    plot(t_hours,rainWavre);
-    title('rain wavre');
+%     
+%     figure();
+%     plot(t_hours,rainPerwez);
+%     title('rain perwez');
+%     
+%     figure();
+%     plot(t_hours,rainBousval);
+%     title('rain bousval');
+%     
+%     figure();
+%     plot(t_hours,rainWavre);
+%     title('rain wavre');
     
     figure;
     subplot(2, 1, 1)
